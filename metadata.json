@@ -1,0 +1,6 @@
+{
+  "name": "LinkDrop",
+  "description": "Download videos, audio, images, and thumbnails from your favorite media links.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
