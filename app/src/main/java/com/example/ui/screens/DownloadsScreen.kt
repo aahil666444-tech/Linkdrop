@@ -146,9 +146,11 @@ fun DownloadsScreen(
       }
     },
     bottomBar = {
+      val activeCount = activeJobs.count { it.status == DownloadStatus.DOWNLOADING || it.status == DownloadStatus.QUEUED }
       LinkDropBottomBar(
         currentScreen = "downloads",
-        onNavigate = onNavigateToScreen
+        onNavigate = onNavigateToScreen,
+        activeDownloadsCount = activeCount
       )
     }
   ) { paddingValues ->

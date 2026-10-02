@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.MockDataProvider
 import com.example.model.MediaAnalyzeResult
 import com.example.model.MediaType
+import com.example.model.PlatformType
 import com.example.providers.ProviderRegistry
 import com.example.storage.StorageHelper
 import com.example.ui.screens.AnalyzeLoadingScreen
@@ -46,11 +47,42 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
   val screenStack = remember { mutableStateListOf("home") }
 
   var currentUrlInput by remember { mutableStateOf("") }
-  var currentMediaResult by remember { mutableStateOf(MockDataProvider.getSampleMedia("")) }
+  var currentMediaResult by remember {
+    mutableStateOf(
+      MediaAnalyzeResult(
+        title = "ForBiggerBlazes.mp4",
+        author = "Google Sample Bucket",
+        authorHandle = "@commondatastorage",
+        platform = PlatformType.OTHER,
+        originalUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        thumbnailUrl = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&auto=format&fit=crop&q=80",
+        duration = "Direct Video",
+        views = "Public Media",
+        uploadDate = "Available Now",
+        description = "Direct MP4 public video sample. Ready to download and save to Gallery.",
+        videoQualities = listOf(
+          com.example.model.VideoQualityOption(
+            id = "direct_mp4",
+            label = "Original Quality (MP4)",
+            resolution = "Source Resolution",
+            fps = "Source FPS",
+            fileSize = "15.0 MB",
+            format = "MP4",
+            isRecommended = true
+          )
+        ),
+        audioQualities = emptyList(),
+        imageQualities = emptyList()
+      )
+    )
+  }
 
   val recentHistoryList by viewModel.recentHistoryList.collectAsStateWithLifecycle()
   val historyList by viewModel.historyList.collectAsStateWithLifecycle()
   val activeJobs by viewModel.activeJobs.collectAsStateWithLifecycle()
+  val activeDownloadsCount = activeJobs.count {
+    it.status == com.example.download.DownloadStatus.DOWNLOADING || it.status == com.example.download.DownloadStatus.QUEUED
+  }
   val appSettings by viewModel.appSettings.collectAsStateWithLifecycle()
   val analysisState by viewModel.analysisState.collectAsStateWithLifecycle()
 
@@ -115,7 +147,8 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
         recentDownloads = recentHistoryList,
         onDeleteRecentEntity = { id, deleteStorageFile ->
           viewModel.deleteHistoryItem(id, deleteStorageFile)
-        }
+        },
+        activeDownloadsCount = activeDownloadsCount
       )
 
       "analyze_loading" -> AnalyzeLoadingScreen(
@@ -165,6 +198,7 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
       )
 
       "video_quality" -> VideoQualityScreen(
+        media = currentMediaResult,
         onBack = { navigateBack() },
         onStartDownload = { quality, format ->
           viewModel.startVideoDownload(currentMediaResult, quality, format)
@@ -173,6 +207,7 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
       )
 
       "image_download" -> ImageDownloadScreen(
+        media = currentMediaResult,
         onBack = { navigateBack() },
         onSaveToGallery = { option, format ->
           viewModel.startImageDownload(currentMediaResult, option, format)
@@ -181,6 +216,7 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
       )
 
       "audio_selection" -> AudioSelectionScreen(
+        media = currentMediaResult,
         onBack = { navigateBack() },
         onExtractAudio = { option ->
           viewModel.startAudioDownload(currentMediaResult, option)
@@ -189,6 +225,7 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
       )
 
       "thumbnail" -> ThumbnailScreen(
+        media = currentMediaResult,
         onBack = { navigateBack() },
         onDownloadThumbnail = { quality ->
           viewModel.startThumbnailDownload(currentMediaResult, quality.resolution)
@@ -255,7 +292,8 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
         },
         onClearAll = { deleteFiles ->
           viewModel.clearAllHistory(deleteFiles)
-        }
+        },
+        activeDownloadsCount = activeDownloadsCount
       )
 
       "settings" -> SettingsScreen(
@@ -274,7 +312,8 @@ fun LinkDropApp(viewModel: LinkDropViewModel = viewModel()) {
         onToggleAutoAnalyze = { viewModel.settingsManager.updateAutoAnalyzeOnPaste(it) },
         onSelectVideoQuality = { viewModel.settingsManager.updateDefaultVideoQuality(it) },
         onSelectAudioFormat = { viewModel.settingsManager.updateDefaultAudioFormat(it) },
-        onClearHistory = { viewModel.clearAllHistory(false) }
+        onClearHistory = { viewModel.clearAllHistory(false) },
+        activeDownloadsCount = activeDownloadsCount
       )
     }
   }

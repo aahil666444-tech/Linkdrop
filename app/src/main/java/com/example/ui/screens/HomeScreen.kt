@@ -102,7 +102,8 @@ fun HomeScreen(
   onNavigateToScreen: (String) -> Unit,
   onOpenRecentEntity: (DownloadHistoryEntity) -> Unit,
   recentDownloads: List<DownloadHistoryEntity>,
-  onDeleteRecentEntity: (String, Boolean) -> Unit
+  onDeleteRecentEntity: (String, Boolean) -> Unit,
+  activeDownloadsCount: Int = 0
 ) {
   val context = LocalContext.current
   val snackbarHostState = remember { SnackbarHostState() }
@@ -239,7 +240,8 @@ fun HomeScreen(
     bottomBar = {
       LinkDropBottomBar(
         currentScreen = "home",
-        onNavigate = onNavigateToScreen
+        onNavigate = onNavigateToScreen,
+        activeDownloadsCount = activeDownloadsCount
       )
     }
   ) { paddingValues ->

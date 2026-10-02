@@ -71,20 +71,30 @@ import com.example.ui.theme.TextSecondary
 
 @Composable
 fun AudioSelectionScreen(
+  media: com.example.model.MediaAnalyzeResult,
   onBack: () -> Unit,
   onExtractAudio: (AudioQualityOption) -> Unit
 ) {
   BackHandler { onBack() }
 
-  val media = MockDataProvider.getSampleMedia("")
-  val audioOptions = media.audioQualities
+  val audioOptions = media.audioQualities.ifEmpty {
+    listOf(
+      AudioQualityOption(
+        id = "audio_direct",
+        format = "MP3",
+        bitrate = "Direct Bitrate",
+        fileSize = "Source Size",
+        isRecommended = true
+      )
+    )
+  }
 
   var selectedOptionId by remember { mutableStateOf(audioOptions.first().id) }
   var isPlaying by remember { mutableStateOf(false) }
   var embedArtwork by remember { mutableStateOf(true) }
   var trimRange by remember { mutableStateOf(0f..100f) }
 
-  val selectedOption = audioOptions.first { it.id == selectedOptionId }
+  val selectedOption = audioOptions.firstOrNull { it.id == selectedOptionId } ?: audioOptions.first()
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),

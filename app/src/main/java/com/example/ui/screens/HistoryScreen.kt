@@ -75,7 +75,8 @@ fun HistoryScreen(
   historyEntities: List<DownloadHistoryEntity>,
   onNavigateToScreen: (String) -> Unit,
   onDeleteItem: (String, Boolean) -> Unit,
-  onClearAll: (Boolean) -> Unit
+  onClearAll: (Boolean) -> Unit,
+  activeDownloadsCount: Int = 0
 ) {
   val context = LocalContext.current
   val snackbarHostState = remember { SnackbarHostState() }
@@ -204,7 +205,8 @@ fun HistoryScreen(
     bottomBar = {
       LinkDropBottomBar(
         currentScreen = "history",
-        onNavigate = onNavigateToScreen
+        onNavigate = onNavigateToScreen,
+        activeDownloadsCount = activeDownloadsCount
       )
     }
   ) { paddingValues ->

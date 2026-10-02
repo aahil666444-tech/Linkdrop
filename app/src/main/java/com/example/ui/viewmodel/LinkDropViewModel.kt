@@ -66,34 +66,6 @@ class LinkDropViewModel(application: Application) : AndroidViewModel(application
 
   init {
     DownloadNotificationHelper.initChannel(application.applicationContext)
-    seedInitialHistoryIfEmpty()
-  }
-
-  private fun seedInitialHistoryIfEmpty() {
-    viewModelScope.launch(Dispatchers.IO) {
-      val existing = database.downloadHistoryDao().getAllHistory().first()
-      if (existing.isEmpty()) {
-        // Pre-seed with the reference screenshot items
-        com.example.data.MockDataProvider.initialRecentDownloads.forEach { item ->
-          database.downloadHistoryDao().insert(
-            DownloadHistoryEntity(
-              id = item.id,
-              filename = item.title,
-              sourceUrl = "https://example.com/${item.title}",
-              platform = item.platform.displayName,
-              mediaType = item.mediaType.name,
-              quality = "1080p",
-              fileSize = 44670000L,
-              formattedSize = item.fileSize,
-              downloadDate = System.currentTimeMillis() - 600000L,
-              localUriString = item.thumbnailUrl,
-              thumbnailUri = item.thumbnailUrl,
-              duration = item.duration
-            )
-          )
-        }
-      }
-    }
   }
 
   fun analyzeUrl(url: String) {
@@ -103,7 +75,7 @@ class LinkDropViewModel(application: Application) : AndroidViewModel(application
     }
     _analysisState.value = AnalysisUiState.Loading(url)
     viewModelScope.launch {
-      val result = ProviderRegistry.analyzeUrl(url)
+      val result = com.example.analysis.MediaAnalyzer.analyzeUrl(url)
       if (result.isSuccess && result.media != null) {
         _analysisState.value = AnalysisUiState.Success(result.media)
       } else {

@@ -327,10 +327,35 @@ fun MediaPreviewScreen(
             )
             Spacer(modifier = Modifier.height(10.dp))
 
-            SpecRow("Video Stream", "HEVC / AV1 • 60 FPS • 2160p HDR")
-            SpecRow("Audio Stream", "Opus Stereo • 48 kHz • 160 kbps")
-            SpecRow("Original Length", media.duration)
-            SpecRow("Estimated Size", "142.6 MB (1080p) / 486 MB (4K)")
+            val primaryVideo = media.videoQualities.firstOrNull()
+            val primaryAudio = media.audioQualities.firstOrNull()
+            val primaryImg = media.imageQualities.firstOrNull()
+
+            when {
+              primaryVideo != null -> {
+                SpecRow("Format", primaryVideo.format)
+                SpecRow("Quality", primaryVideo.label)
+                SpecRow("File Size", primaryVideo.fileSize)
+                if (media.duration.isNotBlank()) {
+                  SpecRow("Duration", media.duration)
+                }
+              }
+              primaryImg != null -> {
+                SpecRow("Format", primaryImg.format)
+                SpecRow("Dimensions", primaryImg.dimensions)
+                SpecRow("File Size", primaryImg.fileSize)
+              }
+              primaryAudio != null -> {
+                SpecRow("Format", primaryAudio.format)
+                SpecRow("Bitrate", primaryAudio.bitrate)
+                SpecRow("File Size", primaryAudio.fileSize)
+              }
+              else -> {
+                SpecRow("Source", media.author)
+                SpecRow("Platform", media.platform.displayName)
+                SpecRow("Status", "Direct Stream")
+              }
+            }
           }
         }
 
@@ -339,13 +364,39 @@ fun MediaPreviewScreen(
 
       // Prominent Action Buttons
       item {
+        val hasVideo = media.videoQualities.isNotEmpty()
+        val hasImage = media.imageQualities.isNotEmpty()
+
+        val mainButtonText = when {
+          hasVideo -> "Select Video Quality"
+          hasImage -> "Select Image Resolution"
+          else -> "Select Format"
+        }
+
+        val onMainAction = when {
+          hasVideo -> onChooseVideoQuality
+          hasImage -> onChooseThumbnail
+          else -> onChooseVideoQuality
+        }
+
         CrimsonAnalyzeButton(
-          text = "Select Video Quality",
-          onClick = onChooseVideoQuality,
+          text = mainButtonText,
+          onClick = onMainAction,
           modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(12.dp))
+
+        val bestQuality = media.videoQualities.firstOrNull { it.isRecommended }
+          ?: media.videoQualities.firstOrNull()
+
+        val downloadBtnLabel = if (bestQuality != null) {
+          "Instant Download (${bestQuality.format})"
+        } else if (media.imageQualities.isNotEmpty()) {
+          "Save Original Image"
+        } else {
+          "Instant Download"
+        }
 
         Box(
           modifier = Modifier
@@ -367,7 +418,7 @@ fun MediaPreviewScreen(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-              text = "Instant Download (Best 1080p)",
+              text = downloadBtnLabel,
               color = CrimsonPrimary,
               fontSize = 14.5.sp,
               fontWeight = FontWeight.Bold

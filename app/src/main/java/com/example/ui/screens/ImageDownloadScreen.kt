@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ImageDownloadScreen(
+  media: com.example.model.MediaAnalyzeResult,
   onBack: () -> Unit,
   onSaveToGallery: (ImageQualityOption, String) -> Unit
 ) {
@@ -78,15 +79,25 @@ fun ImageDownloadScreen(
   val snackbarHostState = remember { SnackbarHostState() }
   val scope = rememberCoroutineScope()
 
-  val media = MockDataProvider.getSampleMedia("")
-  val imageOptions = media.imageQualities
+  val imageOptions = media.imageQualities.ifEmpty {
+    listOf(
+      ImageQualityOption(
+        id = "img_direct",
+        label = "Original Resolution",
+        dimensions = "Source Dimensions",
+        fileSize = "Source Size",
+        format = if (media.title.endsWith(".png", ignoreCase = true)) "PNG" else "JPG",
+        isRecommended = true
+      )
+    )
+  }
 
   var selectedOptionId by remember { mutableStateOf(imageOptions.first().id) }
-  var selectedFormat by remember { mutableStateOf("PNG") }
+  var selectedFormat by remember { mutableStateOf(imageOptions.first().format) }
   var keepExif by remember { mutableStateOf(true) }
-  var removeWatermark by remember { mutableStateOf(true) }
+  var removeWatermark by remember { mutableStateOf(false) }
 
-  val currentOption = imageOptions.first { it.id == selectedOptionId }
+  val currentOption = imageOptions.firstOrNull { it.id == selectedOptionId } ?: imageOptions.first()
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),

@@ -515,6 +515,7 @@ fun RecentDownloadCard(
 fun LinkDropBottomBar(
   currentScreen: String,
   onNavigate: (String) -> Unit,
+  activeDownloadsCount: Int = 0,
   modifier: Modifier = Modifier
 ) {
   Surface(
@@ -544,7 +545,7 @@ fun LinkDropBottomBar(
       BottomNavItem(
         label = "Downloads",
         icon = Icons.Default.FileDownload,
-        badgeCount = 2,
+        badgeCount = activeDownloadsCount,
         isSelected = currentScreen == "downloads",
         testTag = "nav_downloads",
         onClick = { onNavigate("downloads") }

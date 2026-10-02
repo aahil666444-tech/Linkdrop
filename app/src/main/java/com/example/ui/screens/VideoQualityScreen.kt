@@ -63,20 +63,32 @@ import com.example.ui.theme.TextSecondary
 
 @Composable
 fun VideoQualityScreen(
+  media: com.example.model.MediaAnalyzeResult,
   onBack: () -> Unit,
   onStartDownload: (VideoQualityOption, String) -> Unit
 ) {
   BackHandler { onBack() }
 
-  val media = MockDataProvider.getSampleMedia("")
-  val qualities = media.videoQualities
+  val qualities = media.videoQualities.ifEmpty {
+    listOf(
+      VideoQualityOption(
+        id = "video_orig",
+        label = "Original Quality (${if (media.title.endsWith(".webm", ignoreCase = true)) "WEBM" else "MP4"})",
+        resolution = "Source Resolution",
+        fps = "Source FPS",
+        fileSize = "Direct Stream",
+        format = if (media.title.endsWith(".webm", ignoreCase = true)) "WEBM" else "MP4",
+        isRecommended = true
+      )
+    )
+  }
 
   var selectedQualityId by remember { mutableStateOf(qualities.firstOrNull { it.isRecommended }?.id ?: qualities.first().id) }
-  var selectedFormat by remember { mutableStateOf("MP4") }
-  var selectedCodec by remember { mutableStateOf("H.264") }
-  var embedSubtitles by remember { mutableStateOf(true) }
+  var selectedFormat by remember { mutableStateOf(qualities.first().format) }
+  var selectedCodec by remember { mutableStateOf("Native") }
+  var embedSubtitles by remember { mutableStateOf(false) }
 
-  val selectedOption = qualities.first { it.id == selectedQualityId }
+  val selectedOption = qualities.firstOrNull { it.id == selectedQualityId } ?: qualities.first()
 
   Scaffold(
     modifier = Modifier.fillMaxSize(),

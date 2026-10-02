@@ -80,7 +80,8 @@ fun SettingsScreen(
   onToggleAutoAnalyze: (Boolean) -> Unit,
   onSelectVideoQuality: (String) -> Unit,
   onSelectAudioFormat: (String) -> Unit,
-  onClearHistory: () -> Unit
+  onClearHistory: () -> Unit,
+  activeDownloadsCount: Int = 0
 ) {
   val context = LocalContext.current
   val snackbarHostState = remember { SnackbarHostState() }
@@ -186,7 +187,8 @@ fun SettingsScreen(
     bottomBar = {
       LinkDropBottomBar(
         currentScreen = "settings",
-        onNavigate = onNavigateToScreen
+        onNavigate = onNavigateToScreen,
+        activeDownloadsCount = activeDownloadsCount
       )
     }
   ) { paddingValues ->

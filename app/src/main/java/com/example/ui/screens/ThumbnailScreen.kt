@@ -72,6 +72,7 @@ data class ThumbnailQuality(
 
 @Composable
 fun ThumbnailScreen(
+  media: com.example.model.MediaAnalyzeResult,
   onBack: () -> Unit,
   onDownloadThumbnail: (ThumbnailQuality) -> Unit
 ) {
@@ -80,9 +81,7 @@ fun ThumbnailScreen(
   val scope = rememberCoroutineScope()
 
   val thumbnailOptions = listOf(
-    ThumbnailQuality("thumb_max", "MaxRes HD (Full Frame)", "1920 x 1080", "1.4 MB", true),
-    ThumbnailQuality("thumb_hq", "High Quality Standard", "1280 x 720", "740 KB"),
-    ThumbnailQuality("thumb_sd", "Standard Definition", "640 x 480", "320 KB")
+    ThumbnailQuality("thumb_orig", "Original Resolution", "Original HD", "Source Quality", true)
   )
 
   var selectedId by remember { mutableStateOf(thumbnailOptions.first().id) }
@@ -144,7 +143,7 @@ fun ThumbnailScreen(
             .background(CrimsonSoftBg)
         ) {
           AsyncImage(
-            model = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000&auto=format&fit=crop&q=80",
+            model = media.thumbnailUrl.ifEmpty { "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1000&auto=format&fit=crop&q=80" },
             contentDescription = "Full thumbnail",
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
